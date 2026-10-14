@@ -157,6 +157,7 @@ certix-passport/
 └── README.md
 ```
 
+
 ## Organisation de l'équipe
 
 **15 personnes** : 1 Project Manager + 14 membres. Le PM assure le suivi sans réaliser de tâches techniques et communique principalement avec les leads d'équipe.
