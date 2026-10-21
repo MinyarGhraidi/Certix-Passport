@@ -1,0 +1,33 @@
+
+{
+    "description": "Manage your certifications easily.",
+    "choosePalette": "Choose a Color Palette",
+    "myCertifications": "My Certifications",
+    "preview": "Preview your certification passport.",
+    "progress": "Progress",
+    "viewCertifications": "View Certifications",
+    "addCertification": "Add Certification",
+    "certificationName": "Certification Name",
+    "certificationNamePlaceholder": "e.g. AWS Cloud Practitioner",
+    "issuer": "Issuing Organization",
+    "issuerPlaceholder": "e.g. Amazon Web Services",
+    "category": "Category",
+    "chooseCategory": "Choose a Category",
+    "technology": "Technology",
+    "business": "Business",
+    "design": "Design",
+    "marketing": "Marketing",
+    "other": "Other",
+    "issueDate": "Date Obtained",
+    "add": "Add Certification",
+    "remove": "Remove",
+    "emptyState": "No certifications yet. Add your first one!",
+    "requiredFields": "Please fill in all required fields.",
+    "paletteTechBlue": "Tech Blue",
+    "paletteCyberPurple": "Cyber Purple",
+    "paletteEmeraldGreen": "Emerald Green",
+    "paletteMidnightDark": "Midnight Dark",
+    "paletteOrangeEnergy": "Orange Energy",
+    "paletteMinimalMono": "Minimal Mono"
+  }
+  
