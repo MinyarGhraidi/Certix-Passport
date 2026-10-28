@@ -25,3 +25,8 @@ dist-ssr
 
 
 package-lock.json
+
+# Node server
+server/node_modules
+server/data
+server/uploads

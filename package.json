@@ -3,16 +3,16 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  
-"scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "lint": "oxlint",
-  "test": "node src/services/filePreviewCache.test.js",
-  "preview": "vite preview"
-},
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint",
+    "test": "node src/services/filePreviewCache.test.js",
+    "preview": "vite preview"
+  },
   "dependencies": {
     "i18next": "^26.5.2",
+    "lucide-react": "^1.63.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-i18next": "^17.1.0"

@@ -6,6 +6,7 @@ import Button from "./components/Button.jsx";
 import Card from "./components/ui/Card.jsx";
 import Title from "./components/ui/Title.jsx";
 import Subtitle from "./components/ui/Subtitle.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 
 const palettes = {
   "Tech Blue": {
@@ -92,6 +93,7 @@ function App() {
   const [category, setCategory] = useState("");
   const [issueDate, setIssueDate] = useState("");
   const [error, setError] = useState("");
+  const [page, setPage] = useState("certifications"); // "certifications" | "settings"
 
   const changePalette = (paletteName) => {
     const colors = palettes[paletteName];
@@ -148,6 +150,8 @@ function App() {
     { value: "other", label: t("other") },
   ];
 
+  if (page === "settings") return <SettingsPage onNavigate={setPage} />;
+
   return (
     <main
       style={{
@@ -171,6 +175,21 @@ function App() {
         >
           <Title level={1}>CertiX Passport</Title>
 
+          <nav style={{ display: "flex", gap: "8px" }}>
+            <Button
+              variant={page === "certifications" ? "primary" : "secondary"}
+              onClick={() => setPage("certifications")}
+            >
+              {t("nav.certifications")}
+            </Button>
+            <Button
+              variant={page === "settings" ? "primary" : "secondary"}
+              onClick={() => setPage("settings")}
+            >
+              {t("nav.settings")}
+            </Button>
+          </nav>
+
           <select
             aria-label="Language"
             value={i18n.language?.startsWith("fr") ? "fr" : "en"}
@@ -182,6 +201,7 @@ function App() {
           </select>
         </div>
 
+        <>
         <Subtitle>{t("description")}</Subtitle>
 
         <Card title={t("choosePalette")}>
@@ -387,6 +407,7 @@ function App() {
             )}
           </Card>
         </div>
+        </>
       </div>
     </main>
   );
