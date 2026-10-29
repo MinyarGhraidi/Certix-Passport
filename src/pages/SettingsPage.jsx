@@ -50,7 +50,7 @@ function SettingsPage({ onNavigate }) {
     <AppShell profile={profile} theme={theme} onToggleTheme={toggleTheme} onNavigate={onNavigate}>
       {loadFailed && (
         <section className="st-card">
-          <p className="st-error" role="alert">Could not load your profile. Is the server running?</p>
+          <p className="st-error" role="alert">Could not load your profile.</p>
           <div className="st-actions">
             <button type="button" className="st-btn st-btn-primary" onClick={retry}>Try again</button>
           </div>

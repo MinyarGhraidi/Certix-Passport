@@ -1,5 +1,33 @@
-// Appels vers l'API Node. Les URLs commençant par /api et /uploads sont
-// redirigées vers le serveur (port 4000) par le proxy de vite.config.js.
+// Version SANS serveur : le profil est enregistré dans le navigateur (localStorage).
+// Les fonctions gardent exactement les mêmes noms et signatures que la version
+// avec API : pour brancher un vrai serveur plus tard, il suffira de réécrire ce fichier.
+import {
+  cleanProfile,
+  validateProfile,
+  cleanLinks,
+  validateLinks,
+} from "../../shared/validation.js";
+
+const STORAGE_KEY = "certix-settings-profile";
+const MAX_SIDE = { avatar: 256, cover: 1200 }; // taille max (px) pour ne pas saturer le stockage
+
+// Profil de départ (celui du design)
+const DEFAULT_PROFILE = {
+  firstName: "Amira",
+  lastName: "Mansour",
+  username: "amira.mansour",
+  website: "https://example.com",
+  university: "University of Carthage",
+  club: "Innovate Club",
+  program: "Computer Science BSc",
+  year: "LGLSI 3",
+  bio: "Student builder focused on product design and community impact projects.",
+  links: [
+    { id: "default-linkedin", type: "LinkedIn", label: "LinkedIn", url: "https://www.linkedin.com/" },
+  ],
+  avatarUrl: "", // data URL de l'image
+  coverUrl: "",
+};
 
 export class ApiError extends Error {
   constructor(code, fields = {}) {
@@ -9,60 +37,99 @@ export class ApiError extends Error {
   }
 }
 
-async function request(url, options = {}) {
-  let response;
+function read() {
   try {
-    response = await fetch(url, options);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return { ...DEFAULT_PROFILE, ...JSON.parse(raw) };
   } catch {
-    throw new ApiError("network");
+    /* données illisibles : on repart du profil par défaut */
   }
-  const data = await response.json().catch(() => null);
-  if (!response.ok) throw new ApiError(data?.error || "server", data?.fields);
-  return data;
+  return JSON.parse(JSON.stringify(DEFAULT_PROFILE));
 }
 
-const json = (method, body) => ({
-  method,
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(body),
-});
+function write(profile) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+  } catch {
+    throw new ApiError("storage"); // stockage plein ou désactivé
+  }
+  return profile;
+}
 
-export const getProfile = () => request("/api/profile");
-export const saveProfile = (fields) => request("/api/profile", json("PUT", fields));
-export const saveLinks = (links) => request("/api/profile/links", json("PUT", { links }));
-export const removeImage = (kind) => request(`/api/profile/${kind}`, { method: "DELETE" });
+export async function getProfile() {
+  return read();
+}
 
-// XMLHttpRequest (et non fetch) car fetch ne donne pas la progression d'envoi.
-export function uploadImage(kind, file, onProgress, signal) {
+export async function saveProfile(fields) {
+  const data = cleanProfile(fields);
+  const errors = validateProfile(data);
+  if (Object.keys(errors).length > 0) throw new ApiError("validation", errors);
+  return write({ ...read(), ...data });
+}
+
+export async function saveLinks(links) {
+  const clean = cleanLinks(links).map((link) => ({ ...link, id: link.id || crypto.randomUUID() }));
+  const errors = validateLinks(clean);
+  if (Object.keys(errors).length > 0) throw new ApiError("validation", errors);
+  return write({ ...read(), links: clean });
+}
+
+export async function removeImage(kind) {
+  return write({ ...read(), [`${kind}Url`]: "" });
+}
+
+// ----- Envoi d'une image (lecture + réduction dans le navigateur) -----
+
+function readFile(file, onProgress, signal) {
   return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", `/api/profile/${kind}`);
-    xhr.timeout = 30000;
-
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100));
+    const reader = new FileReader();
+    reader.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 60));
     };
-    xhr.onload = () => {
-      let data = null;
-      try {
-        data = JSON.parse(xhr.responseText);
-      } catch {
-        /* réponse non JSON */
-      }
-      if (xhr.status >= 200 && xhr.status < 300 && data) {
-        onProgress(100);
-        resolve(data);
-      } else {
-        reject(new ApiError(data?.error || (xhr.status === 413 ? "file_too_large" : "server")));
-      }
-    };
-    xhr.onerror = () => reject(new ApiError("network"));
-    xhr.ontimeout = () => reject(new ApiError("network"));
-    xhr.onabort = () => reject(new ApiError("aborted"));
-    signal?.addEventListener("abort", () => xhr.abort());
-
-    const body = new FormData();
-    body.append("image", file);
-    xhr.send(body);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new ApiError("invalid_image"));
+    reader.onabort = () => reject(new ApiError("aborted"));
+    signal?.addEventListener("abort", () => reader.abort());
+    reader.readAsDataURL(file);
   });
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new ApiError("invalid_image"));
+    img.src = src;
+  });
+}
+
+// Réduit l'image et la convertit en JPEG (fond blanc pour les PNG transparents)
+function shrink(img, maxSide) {
+  const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(img.width * scale));
+  canvas.height = Math.max(1, Math.round(img.height * scale));
+  const context = canvas.getContext("2d");
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", 0.85);
+}
+
+export async function uploadImage(kind, file, onProgress, signal) {
+  const stopIfAborted = () => {
+    if (signal?.aborted) throw new ApiError("aborted");
+  };
+
+  const dataUrl = await readFile(file, onProgress, signal);
+  stopIfAborted();
+  onProgress(75);
+
+  const img = await loadImage(dataUrl);
+  stopIfAborted();
+  onProgress(90);
+
+  const profile = write({ ...read(), [`${kind}Url`]: shrink(img, MAX_SIDE[kind]) });
+  onProgress(100);
+  return profile;
 }

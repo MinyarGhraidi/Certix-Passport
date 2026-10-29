@@ -18,7 +18,8 @@ const UPLOAD = {
   file_too_large: "This file is larger than 10 MB.",
   invalid_image: "This image is empty or corrupted.",
   network: "Upload failed. Check your connection and try again.",
-  server: "Upload failed. The server could not save the image. Try again.",
+  server: "Upload failed. The image could not be saved. Try again.",
+  storage: "Could not save the image. Your browser storage is full.",
   bad_request: "Upload failed. Try again with another image.",
   no_file: "No file was received. Try again.",
 };
