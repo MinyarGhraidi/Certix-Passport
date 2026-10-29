@@ -239,7 +239,7 @@ export function AchievementsExplorer({
                     {visibleRecords.map((record) => (
                         <article
                             key={record.id}
-                            className="cxw-card"
+                            className="cxw-card cxw-achievement-item"
                             style={{
                                 minHeight: 235,
                                 display: "flex",

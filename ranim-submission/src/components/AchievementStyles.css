@@ -191,6 +191,18 @@
     gap: var(--ds-space-4);
 }
 
+.cxw.cxw-achievements .cxw-achievement-item {
+    --cxw-achievement-card-inset: var(--ds-space-6);
+    position: relative;
+    padding-top: calc(var(--cxw-achievement-card-inset) + 24px);
+}
+
+.cxw.cxw-achievements .cxw-achievement-item .cxw-achievement-status {
+    position: absolute;
+    top: var(--cxw-achievement-card-inset);
+    right: var(--cxw-achievement-card-inset);
+}
+
 .cxw.cxw-achievements .cxw-title {
     margin: 0;
     color: var(--ach-ink);
@@ -441,6 +453,11 @@
 
     .cxw.cxw-achievements .cxw-card {
         padding: 18px;
+    }
+
+    .cxw.cxw-achievements .cxw-achievement-item {
+        --cxw-achievement-card-inset: 18px;
+        padding-top: calc(var(--cxw-achievement-card-inset) + 24px);
     }
 
     .cxw.cxw-achievements .cxw-achievements-page-title {
