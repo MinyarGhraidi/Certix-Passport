@@ -1,416 +1,284 @@
-
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AppProvider, useApp } from "./services/AppContext";
+import { LoginPage, RegisterPage, ForgotPasswordPage } from "./pages/AuthPages";
+import { Sidebar, Header } from "./components/layout/AppLayout";
+import { DashboardPage } from "./pages/DashboardPage";
+import { DigitalPassportPage } from "./pages/DigitalPassportPage";
+import { RecordsSectionPage, RecordModal } from "./pages/RecordsSectionPage";
+import { PublicPassportPage } from "./pages/PublicPassportPage";
+import { AdminDashboardPage } from "./pages/AdminDashboardPage";
+import { SettingsProfilePage } from "./pages/SettingsProfilePage";
+import { EventsListPage } from "./pages/EventsListPage";
+import { EventDetailsPage } from "./pages/EventDetailsPage";
+import { EventModal } from "./components/events/EventModal";
+import { Medal, ArrowRight, ExternalLink, UserCheck, BookOpen, Share2 } from "lucide-react";
+import "./styles/theme.css";
 
-import Button from "./components/Button.jsx";
-import Card from "./components/ui/Card.jsx";
-import Title from "./components/ui/Title.jsx";
-import Subtitle from "./components/ui/Subtitle.jsx";
-import SettingsPage from "./pages/SettingsPage.jsx";
-
-const palettes = {
-  "Tech Blue": {
-    primary: "#2563eb",
-    secondary: "#06b6d4",
-    background: "#f8fafc",
-    surface: "#ffffff",
-    text: "#0f172a",
-    muted: "#64748b",
-  },
-  "Cyber Purple": {
-    primary: "#7c3aed",
-    secondary: "#a78bfa",
-    background: "#f8f7ff",
-    surface: "#ffffff",
-    text: "#1e1b4b",
-    muted: "#6b6585",
-  },
-  "Emerald Green": {
-    primary: "#059669",
-    secondary: "#34d399",
-    background: "#f3faf7",
-    surface: "#ffffff",
-    text: "#102a22",
-    muted: "#61756d",
-  },
-  "Midnight Dark": {
-    primary: "#38bdf8",
-    secondary: "#a78bfa",
-    background: "#0b1120",
-    surface: "#151f32",
-    text: "#f1f5f9",
-    muted: "#9aa9bd",
-  },
-  "Orange Energy": {
-    primary: "#ea580c",
-    secondary: "#fbbf24",
-    background: "#fffbf5",
-    surface: "#ffffff",
-    text: "#292018",
-    muted: "#786b60",
-  },
-  "Minimal Mono": {
-    primary: "#27272a",
-    secondary: "#71717a",
-    background: "#fafafa",
-    surface: "#ffffff",
-    text: "#18181b",
-    muted: "#71717a",
-  },
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "12px",
-  marginTop: "6px",
-  border: "1px solid #cbd5e1",
-  borderRadius: "10px",
-  background: "var(--surface)",
-  color: "var(--text)",
-  fontSize: "15px",
-};
-
-function App() {
-  const { t, i18n } = useTranslation();
-
-  const [certifications, setCertifications] = useState(() => {
-    try {
-      const savedCertifications = localStorage.getItem("certix-certifications");
-      return savedCertifications ? JSON.parse(savedCertifications) : [];
-    } catch {
-      return [];
-    }
-  });
-  
-  useEffect(() => {
-    localStorage.setItem(
-      "certix-certifications",
-      JSON.stringify(certifications)
-    );
-  }, [certifications]);
-  const [name, setName] = useState("");
-  const [issuer, setIssuer] = useState("");
-  const [category, setCategory] = useState("");
-  const [issueDate, setIssueDate] = useState("");
-  const [error, setError] = useState("");
-  const [page, setPage] = useState("certifications"); // "certifications" | "settings"
-
-  const changePalette = (paletteName) => {
-    const colors = palettes[paletteName];
-
-    Object.entries(colors).forEach(([key, value]) => {
-      document.documentElement.style.setProperty(`--${key}`, value);
-    });
-  };
-
-  const addCertification = (event) => {
-    event.preventDefault();
-
-    if (!name.trim() || !issuer.trim() || !category || !issueDate) {
-      setError(t("requiredFields"));
-      return;
-    }
-
-    const newCertification = {
-      id: `${Date.now()}-${Math.random()}`,
-      name: name.trim(),
-      issuer: issuer.trim(),
-      category,
-      issueDate,
-    };
-
-    setCertifications((previous) => [
-      ...previous,
-      newCertification,
-    ]);
-
-    setName("");
-    setIssuer("");
-    setCategory("");
-    setIssueDate("");
-    setError("");
-  };
-
-  const removeCertification = (id) => {
-    setCertifications((previous) =>
-      previous.filter((certification) => certification.id !== id)
-    );
-  };
-
-  const progress = Math.min(
-    100,
-    Math.round((certifications.length / 5) * 100)
-  );
-
-  const categories = [
-    { value: "technology", label: t("technology") },
-    { value: "business", label: t("business") },
-    { value: "design", label: t("design") },
-    { value: "marketing", label: t("marketing") },
-    { value: "other", label: t("other") },
-  ];
-
-  if (page === "settings") return <SettingsPage onNavigate={setPage} />;
+function BadgesPage() {
+  const { t } = useTranslation();
+  const { records, setActiveTab } = useApp();
+  const verifiedCount = records.filter((r) => r.status === "verified").length;
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "32px 20px",
-        background: "var(--background)",
-        color: "var(--text)",
-        transition: "background 0.2s",
-      }}
-    >
-      <div style={{ maxWidth: "850px", margin: "auto" }}>
+    <div className="cx-page-pad" style={{ padding: "32px", maxWidth: "960px", margin: "0 auto" }}>
+      <div className="cx-card" style={{ padding: "32px" }}>
         <div
           style={{
+            width: "44px",
+            height: "44px",
+            borderRadius: "12px",
+            backgroundColor: "var(--primary-light)",
+            color: "var(--primary)",
             display: "flex",
-            justifyContent: "space-between",
             alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-            marginBottom: "20px",
+            justifyContent: "center",
+            marginBottom: "16px",
           }}
         >
-          <Title level={1}>CertiX Passport</Title>
-
-          <nav style={{ display: "flex", gap: "8px" }}>
-            <Button
-              variant={page === "certifications" ? "primary" : "secondary"}
-              onClick={() => setPage("certifications")}
-            >
-              {t("nav.certifications")}
-            </Button>
-            <Button
-              variant={page === "settings" ? "primary" : "secondary"}
-              onClick={() => setPage("settings")}
-            >
-              {t("nav.settings")}
-            </Button>
-          </nav>
-
-          <select
-            aria-label="Language"
-            value={i18n.language?.startsWith("fr") ? "fr" : "en"}
-            onChange={(event) => i18n.changeLanguage(event.target.value)}
-            style={{ ...inputStyle, width: "auto", marginTop: 0 }}
-          >
-            <option value="en">English</option>
-            <option value="fr">Français</option>
-          </select>
+          <Medal size={22} />
         </div>
-
-        <>
-        <Subtitle>{t("description")}</Subtitle>
-
-        <Card title={t("choosePalette")}>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
-            }}
-          >
-            
-
-            {Object.entries(palettes).map(([paletteName, colors]) => {
-  const paletteKeys = {
-    "Tech Blue": "paletteTechBlue",
-    "Cyber Purple": "paletteCyberPurple",
-    "Emerald Green": "paletteEmeraldGreen",
-    "Midnight Dark": "paletteMidnightDark",
-    "Orange Energy": "paletteOrangeEnergy",
-    "Minimal Mono": "paletteMinimalMono"
-  };
-
-  return (
-    <Button
-      key={paletteName}
-      onClick={() => changePalette(paletteName)}
-      style={{
-        background: colors.primary,
-        color: "#ffffff"
-      }}
-    >
-      {t(paletteKeys[paletteName])}
-    </Button>
-  );
-})}
-
-
-          </div>
-        </Card>
-
-        <div style={{ marginTop: "24px" }}>
-          <Card title={t("addCertification")}>
-            <form
-              onSubmit={addCertification}
-              style={{
-                display: "grid",
-                gap: "16px",
-              }}
-            >
-              <label>
-                {t("certificationName")} *
-                <input
-                  style={inputStyle}
-                  type="text"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder={t("certificationNamePlaceholder")}
-                  required
-                />
-              </label>
-
-              <label>
-                {t("issuer")} *
-                <input
-                  style={inputStyle}
-                  type="text"
-                  value={issuer}
-                  onChange={(event) => setIssuer(event.target.value)}
-                  placeholder={t("issuerPlaceholder")}
-                  required
-                />
-              </label>
-
-              <label>
-                {t("category")} *
-                <select
-                  style={inputStyle}
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                  required
-                >
-                  <option value="">{t("chooseCategory")}</option>
-                  {categories.map((item) => (
-                    <option key={item.value} value={item.value}>
-                      {item.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                {t("issueDate")} *
-                <input
-                  style={inputStyle}
-                  type="date"
-                  value={issueDate}
-                  onChange={(event) => setIssueDate(event.target.value)}
-                  required
-                />
-              </label>
-
-              {error && (
-                <p role="alert" style={{ color: "#dc2626" }}>
-                  {error}
-                </p>
-              )}
-
-              <div>
-                <Button type="submit">{t("add")}</Button>
-              </div>
-            </form>
-          </Card>
-        </div>
-
-        <div style={{ marginTop: "24px" }}>
-          <Card title={t("myCertifications")}>
-            <Subtitle>{t("preview")}</Subtitle>
-
-            <div
-              style={{
-                height: "12px",
-                background: "var(--secondary)",
-                borderRadius: "10px",
-                overflow: "hidden",
-                marginBottom: "10px",
-              }}
-            >
-              <div
-                style={{
-                  height: "100%",
-                  width: `${progress}%`,
-                  background: "var(--primary)",
-                  transition: "width 0.3s",
-                }}
-              />
-            </div>
-
-            <Subtitle>
-              {t("progress")}: {progress}% ({certifications.length}/5)
-            </Subtitle>
-
-            {certifications.length === 0 ? (
-              <p style={{ color: "var(--muted)", marginTop: "16px" }}>
-                {t("emptyState")}
-              </p>
-            ) : (
-              <div
-                style={{
-                  display: "grid",
-                  gap: "14px",
-                  marginTop: "20px",
-                }}
-              >
-                {certifications.map((certification) => (
-                  <article
-                    key={certification.id}
-                    style={{
-                      padding: "18px",
-                      border: "1px solid var(--secondary)",
-                      borderRadius: "12px",
-                      background: "var(--surface)",
-                    }}
-                  >
-                    <h3 style={{ marginBottom: "8px" }}>
-                      {certification.name}
-                    </h3>
-
-                    <p style={{ color: "var(--muted)", marginBottom: "6px" }}>
-                      {certification.issuer}
-                    </p>
-
-                    <p style={{ marginBottom: "6px" }}>
-                      {t(certification.category)}
-                    </p>
-
-                    <p style={{ color: "var(--muted)", marginBottom: "14px" }}>
-                      {certification.issueDate}
-                      {certification.issueDate &&
-                       new Intl.DateTimeFormat(
-                       i18n.language?.startsWith("fr") ? "fr-FR" : "en-US",
-                       {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        timeZone: "UTC",
-                      }
-                      ).format(
-                       new Date(`${certification.issueDate}T00:00:00Z`)
-                                                                       )}
-                    </p>
-
-                    <Button
-                      variant="secondary"
-                      onClick={() => removeCertification(certification.id)}
-                    >
-                       {t("remove")}
-                      
-                      
-                    </Button>
-                  </article>
-                ))}
-              </div>
-            )}
-          </Card>
-        </div>
-        </>
+        <h2 style={{ fontSize: "20px", fontWeight: "700", color: "var(--text-main)", marginBottom: "8px" }}>
+          {t("badges.title")}
+        </h2>
+        <p style={{ fontSize: "14px", color: "var(--text-muted)", marginBottom: "18px" }}>
+          {t("badges.subtitle")} ({verifiedCount} {t("status.verifiedShort")})
+        </p>
+        <p style={{ fontSize: "13.5px", color: "var(--text-muted)", marginBottom: "20px" }}>
+          {t("badges.empty")}
+        </p>
+        <button
+          onClick={() => setActiveTab("achievements")}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            background: "none",
+            border: "none",
+            color: "var(--primary)",
+            fontWeight: "600",
+            fontSize: "14px",
+            padding: 0,
+          }}
+        >
+          {t("badges.explore")} <ArrowRight size={15} />
+        </button>
       </div>
-    </main>
+    </div>
   );
 }
 
-export default App;
+function HelpSupportPage() {
+  const { t } = useTranslation();
+  const { setActiveTab } = useApp();
+
+  return (
+    <div className="cx-page-pad" style={{ padding: "32px", maxWidth: "1000px", margin: "0 auto" }}>
+      <div style={{ marginBottom: "22px" }}>
+        <h1 style={{ fontSize: "24px", fontWeight: "700", color: "var(--text-main)", marginBottom: "6px" }}>
+          {t("help.title")}
+        </h1>
+        <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>{t("help.subtitle")}</p>
+      </div>
+
+      <div
+        style={{
+          backgroundColor: "var(--surface-muted)",
+          border: "1px solid var(--border-light)",
+          borderRadius: "16px",
+          padding: "22px 26px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: "28px",
+          flexWrap: "wrap",
+          gap: "14px",
+        }}
+      >
+        <div>
+          <h3 style={{ fontSize: "16px", fontWeight: "700", color: "var(--text-main)", marginBottom: "4px" }}>
+            {t("help.needHandTitle")}
+          </h3>
+          <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>{t("help.needHandDesc")}</p>
+        </div>
+        <a
+          href="mailto:club@sesame.com.tn"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "9px 16px",
+            borderRadius: "10px",
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border-light)",
+            color: "var(--text-main)",
+            fontSize: "13px",
+            fontWeight: "600",
+            textDecoration: "none",
+          }}
+        >
+          <ExternalLink size={14} /> {t("help.contactAdmin")}
+        </a>
+      </div>
+
+      <h2 style={{ fontSize: "17px", fontWeight: "700", color: "var(--text-main)", marginBottom: "16px" }}>
+        {t("help.gettingStarted")}
+      </h2>
+
+      <div className="cx-grid-3">
+        {[
+          { Icon: UserCheck, title: t("help.step1Title"), desc: t("help.step1Desc"), cta: t("help.step1Cta"), tab: "settings" },
+          { Icon: BookOpen, title: t("help.step2Title"), desc: t("help.step2Desc"), cta: t("help.step2Cta"), tab: "passport" },
+          { Icon: Share2, title: t("help.step3Title"), desc: t("help.step3Desc"), cta: t("help.step3Cta"), tab: "public-preview" },
+        ].map(({ Icon, title, desc, cta, tab }) => (
+          <div key={tab} className="cx-card" style={{ padding: "22px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ color: "var(--primary)", marginBottom: "12px" }}>
+                <Icon size={20} />
+              </div>
+              <h3 style={{ fontSize: "15px", fontWeight: "700", color: "var(--text-main)", marginBottom: "8px" }}>{title}</h3>
+              <p style={{ fontSize: "13px", color: "var(--text-muted)", lineHeight: "1.55", marginBottom: "18px" }}>{desc}</p>
+            </div>
+            <button
+              onClick={() => setActiveTab(tab)}
+              style={{ background: "none", border: "none", color: "var(--primary)", fontSize: "13px", fontWeight: "600", textAlign: "left", padding: 0 }}
+            >
+              {cta} →
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AppContent() {
+  const { t } = useTranslation();
+  const { activeTab, notification } = useApp();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  if (activeTab === "login") return <LoginPage />;
+  if (activeTab === "register") return <RegisterPage />;
+  if (activeTab === "forgot-password") return <ForgotPasswordPage />;
+  if (activeTab === "public-preview") return <PublicPassportPage />;
+
+  const getHeaderTitle = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return t("nav.dashboard");
+      case "passport":
+        return t("nav.passport");
+      case "events":
+        return t("nav.events");
+      case "event-details":
+        return t("nav.eventDetails");
+      case "achievements":
+        return t("nav.achievements");
+      case "certifications":
+        return t("nav.certifications");
+      case "experience":
+        return t("nav.experience");
+      case "activities":
+        return t("nav.activities");
+      case "projects":
+        return t("nav.projects");
+      case "badges":
+        return t("nav.badges");
+      case "settings":
+        return t("nav.settings");
+      case "admin":
+        return t("nav.adminDashboard");
+      case "help":
+        return t("nav.help");
+      default:
+        return "CertiX Passport";
+    }
+  };
+
+  return (
+    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "var(--background)" }}>
+      {notification && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "24px",
+            right: "24px",
+            backgroundColor: notification.type === "error" ? "#dc2626" : "#0f172a",
+            color: "#ffffff",
+            padding: "12px 20px",
+            borderRadius: "10px",
+            fontSize: "13.5px",
+            fontWeight: "500",
+            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.2)",
+            zIndex: 100,
+          }}
+        >
+          {notification.message}
+        </div>
+      )}
+
+      <Sidebar mobileOpen={mobileMenuOpen} onCloseMobile={() => setMobileMenuOpen(false)} />
+
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflowY: "auto" }}>
+        <Header title={getHeaderTitle()} onOpenMobile={() => setMobileMenuOpen(true)} />
+
+        <main style={{ flex: 1 }}>
+          {activeTab === "dashboard" && <DashboardPage />}
+          {activeTab === "passport" && <DigitalPassportPage />}
+          {activeTab === "events" && <EventsListPage />}
+          {activeTab === "event-details" && <EventDetailsPage />}
+          {activeTab === "achievements" && (
+            <RecordsSectionPage
+              category="achievement"
+              title={t("nav.achievements")}
+              addLabel={t("passport.addItem")}
+            />
+          )}
+          {activeTab === "certifications" && (
+            <RecordsSectionPage
+              category="certification"
+              title={t("nav.certifications")}
+              addLabel={t("addCertification")}
+            />
+          )}
+          {activeTab === "experience" && (
+            <RecordsSectionPage
+              category="experience"
+              title={t("nav.experience")}
+              addLabel={t("passport.addItem")}
+            />
+          )}
+          {activeTab === "activities" && (
+            <RecordsSectionPage
+              category="activity"
+              title={t("nav.activities")}
+              addLabel={t("passport.addItem")}
+            />
+          )}
+          {activeTab === "projects" && (
+            <RecordsSectionPage
+              category="project"
+              title={t("nav.projects")}
+              addLabel={t("passport.addItem")}
+            />
+          )}
+          {activeTab === "badges" && <BadgesPage />}
+          {activeTab === "settings" && <SettingsProfilePage />}
+          {activeTab === "admin" && <AdminDashboardPage />}
+          {activeTab === "help" && <HelpSupportPage />}
+        </main>
+      </div>
+
+      <RecordModal />
+      <EventModal />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
+  );
+}

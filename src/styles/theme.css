@@ -1,0 +1,200 @@
+:root {
+  --primary: #b33753;
+  --primary-hover: #9c2b45;
+  --primary-light: #fdf2f4;
+  --secondary: #6366f1;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --text-main: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --border-light: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --border-focus: #b33753;
+
+  --badge-verified-bg: #e6f7f0;
+  --badge-verified-text: #059669;
+  --badge-verified-border: #c2eedc;
+
+  --badge-pending-bg: #fef3c7;
+  --badge-pending-text: #b45309;
+  --badge-pending-border: #fde68a;
+
+  --badge-rejected-bg: #fee2e2;
+  --badge-rejected-text: #dc2626;
+  --badge-rejected-border: #fecaca;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="dark"] {
+  --background: #0b1120;
+  --surface: #111827;
+  --surface-muted: #1e293b;
+  --text-main: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border-light: #334155;
+  --border-subtle: #1e293b;
+  --primary-light: rgba(179, 55, 83, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--background);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(179, 55, 83, 0.12);
+}
+
+.cx-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.cx-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.cx-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.cx-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.cx-grid-hero {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 24px;
+}
+
+.cx-grid-filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+.cx-grid-filters-3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
+}
+
+.cx-mobile-menu-btn {
+  display: none !important;
+}
+
+.cx-sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .cx-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cx-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cx-grid-hero {
+    grid-template-columns: 1fr;
+  }
+  .cx-grid-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .cx-mobile-menu-btn {
+    display: inline-flex !important;
+  }
+
+  .cx-sidebar {
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    z-index: 60;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .cx-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .cx-sidebar-backdrop.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 55;
+  }
+}
+
+@media (max-width: 640px) {
+  .cx-grid-4,
+  .cx-grid-3,
+  .cx-grid-2,
+  .cx-grid-filters,
+  .cx-grid-filters-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .cx-page-pad {
+    padding: 18px 16px !important;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+  .cx-no-print {
+    display: none !important;
+  }
+  #passport-print-area {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+  }
+}
